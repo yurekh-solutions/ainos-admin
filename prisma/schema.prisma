@@ -1,0 +1,1334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                 String              @id @default(uuid())
+  name               String
+  logoUrl            String?             @map("logo_url")
+  gstNumber          String?             @map("gst_number")
+  taxId              String?             @map("tax_id")
+  address            String?
+  email              String?
+  phone              String?
+  website            String?
+  country            String?
+  companyType        String?             @map("company_type")
+  uploadedDocs       Json?               @map("uploaded_docs")
+  docsVerified       Boolean             @default(false) @map("docs_verified")
+  docsVerifiedAt     DateTime?           @map("docs_verified_at")
+  docsVerifiedBy     String?             @map("docs_verified_by")
+  bankName           String?             @map("bank_name")
+  bankAccountNumber  String?             @map("bank_account_number")
+  bankIfscCode       String?             @map("bank_ifsc_code")
+  createdBy          String              @map("created_by")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+
+  // ONBOARDING STATUS TRACKING
+  onboardingStatus   String              @default("pending") @map("onboarding_status") // pending, docs_submitted, under_review, approved, rejected, suspended
+  onboardingSubmittedAt DateTime?        @map("onboarding_submitted_at")
+  onboardingRejectionReason String?      @map("onboarding_rejection_reason")
+  onboardingReviewedAt DateTime?         @map("onboarding_reviewed_at")
+  onboardingReviewedBy String?           @map("onboarding_reviewed_by")
+  totalDocsUploaded  Int                 @default(0) @map("total_docs_uploaded")
+  totalDocsApproved  Int                 @default(0) @map("total_docs_approved")
+  
+  // TOOL ACCESS LEVELS (0=locked, 1=basic, 2=subscribed, 3=premium)
+  autoBlog           Int                 @default(0) @map("auto_blog_level")
+  invoiceGen         Int                 @default(0) @map("invoice_gen_level")
+  crmAccess          Int                 @default(0) @map("crm_access_level")
+  inventoryMgmt      Int                 @default(0) @map("inventory_mgmt_level")
+  hrPayroll          Int                 @default(0) @map("hr_payroll_level")
+  emailMarketing     Int                 @default(0) @map("email_marketing_level")
+  aiAssistant        Int                 @default(0) @map("ai_assistant_level")
+  websiteGen         Int                 @default(0) @map("website_gen_level")
+  
+  // SUBSCRIPTION STATUS
+  subscriptionStatus String              @default("inactive") @map("subscription_status")
+  subscriptionEndsAt DateTime?           @map("subscription_ends_at")
+  
+  aiChatSessions     AIChatSession[]
+  attendance         Attendance[]
+  automations        Automation[]
+  blogPosts          BlogPost[]
+  blogSchedules      BlogSchedule[]
+  blogSubscriptions  BlogSubscription[]
+  calendarEvents     CalendarEvent[]
+  candidates         Candidate[]
+  complianceTasks    ComplianceTask[]
+  connectedWebsites  ConnectedWebsite[]
+  contacts           Contact[]
+  creditBalance      CreditBalance?
+  creditTransactions CreditTransaction[]
+  customers          Customer[]
+  deals              Deal[]
+  documents          Document[]
+  emailCampaigns     EmailCampaign[]
+  employees          Employee[]
+  expenses           Expense[]
+  followUps          FollowUp[]
+  generatedSites     GeneratedSite[]
+  helpdeskTickets    HelpdeskTicket[]
+  invoices           Invoice[]
+  knowledgeArticles  KnowledgeArticle[]
+  leads              Lead[]
+  leaveRequests      LeaveRequest[]
+  notifications      Notification[]
+  payrollRuns        PayrollRun[]
+  products           Product[]
+  projects           Project[]
+  purchaseOrders     PurchaseOrder[]
+  quotes             Quote[]
+  salesOrders        SalesOrder[]
+  serviceRequests    ServiceRequest[]
+  stockItems         StockItem[]
+  subscriptions      Subscription[]
+  tasks              Task[]
+  timesheets         Timesheet[]
+  toolRuns           ToolRun[]
+  toolActivations    ToolActivation[]
+  users              User[]
+  vendors            Vendor[]
+  warehouses         Warehouse[]
+  deliveryChallans   DeliveryChallan[]
+  invoiceTemplates   InvoiceTemplate[]
+  accounts           Account[]
+  journalEntries     JournalEntry[]
+  creditNotes        CreditNote[]
+  debitNotes         DebitNote[]
+  recurringInvoices  RecurringInvoice[]
+  bankAccounts       BankAccount[]
+  bankTransactions   BankTransaction[]
+  onboardingAudits   OnboardingAudit[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  googleId  String?  @unique @map("google_id")
+  image     String?
+  role      String   @default("user")
+  isAdmin   Boolean  @default(false) @map("is_admin")
+  companyId String?  @map("company_id")
+  phone     String?
+  address   String?
+  country   String?
+  timezone  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  password  String?
+  resetToken String? @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@map("users")
+}
+
+model Contact {
+  id            String    @id @default(uuid())
+  name          String
+  email         String?
+  phone         String?
+  company       String?
+  tags          Json?
+  source        String    @default("manual")
+  dealValue     Float?    @map("deal_value")
+  stage         String    @default("lead")
+  lastContacted DateTime? @map("last_contacted")
+  notes         String?
+  createdBy     String    @map("created_by")
+  companyId     String?   @map("company_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  companyRef    Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([email])
+  @@map("contacts")
+}
+
+model Lead {
+  id         String   @id @default(uuid())
+  name       String
+  email      String?
+  phone      String?
+  company    String?
+  source     String   @default("manual")
+  status     String   @default("new")
+  score      Int      @default(0)
+  notes      String?
+  assignedTo String?  @map("assigned_to")
+  companyId  String?  @map("company_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  companyRef Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("leads")
+}
+
+model Customer {
+  id            String   @id @default(uuid())
+  name          String
+  email         String?
+  phone         String?
+  company       String?
+  address       String?
+  gstNumber     String?  @map("gst_number")
+  panNumber     String?  @map("pan_number")
+  state         String?
+  pincode       String?
+  status        String   @default("active")
+  notes         String?
+  companyId     String?  @map("company_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  companyRef    Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("customers")
+}
+
+model Deal {
+  id            String    @id @default(uuid())
+  title         String
+  value         Float?
+  currency      String    @default("USD")
+  stage         String    @default("new")
+  probability   Int       @default(0)
+  expectedClose DateTime? @map("expected_close")
+  source        String?
+  ownerId       String?   @map("owner_id")
+  notes         String?
+  companyId     String?   @map("company_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  companyRef    Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("deals")
+}
+
+model Employee {
+  id          String    @id @default(uuid())
+  name        String
+  email       String?   @unique
+  phone       String?
+  department  String?
+  position    String?
+  salary      Float?
+  joinDate    DateTime? @map("join_date")
+  status      String    @default("active")
+  address     String?
+  bankDetails Json?     @map("bank_details")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("employees")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  sku         String?  @unique
+  description String?
+  price       Float?
+  cost        Float?
+  costPrice   Float?   @map("cost_price")
+  mrp         Float?
+  hsnCode     String?  @map("hsn_code")
+  barcode     String?  @unique
+  gstRate     Float?   @map("gst_rate")
+  category    String?
+  stock       Int      @default(0)
+  unit        String?  @default("pcs")
+  status      String   @default("active")
+  companyId   String?  @map("company_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("products")
+}
+
+model Invoice {
+  id                String    @id @default(uuid())
+  invoiceNumber     String    @unique @map("invoice_number")
+  customerId        String?   @map("customer_id")
+  customerName      String?   @map("customer_name")
+  items             Json?
+  subtotal          Float?
+  tax               Float?
+  discount          Float?    @default(0)
+  total             Float?
+  status            String    @default("draft")
+  dueDate           DateTime? @map("due_date")
+  paidDate          DateTime? @map("paid_date")
+  notes             String?
+  companyId         String?   @map("company_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  createdBy         String?   @map("created_by")
+  customerAddress   String?   @map("customer_address")
+  customerEmail     String?   @map("customer_email")
+  customerGstNumber String?   @map("customer_gst_number")
+  invoiceDate       DateTime? @map("invoice_date")
+  taxRate           Float?    @map("tax_rate")
+  taxTotal          Float?    @map("tax_total")
+  totalAmount       Float?    @map("total_amount")
+  // GST split fields
+  cgstAmount        Float?    @map("cgst_amount")
+  sgstAmount        Float?    @map("sgst_amount")
+  igstAmount        Float?    @map("igst_amount")
+  billingType       String?   @map("billing_type")
+  supplyType        String?   @map("supply_type")
+  discountAmount    Float?    @map("discount_amount")
+  discountType      String?   @map("discount_type")
+  profitAmount      Float?    @map("profit_amount")
+  // E-Invoice fields
+  einvoiceIrn       String?   @map("einvoice_irn")
+  einvoiceQr        String?   @map("einvoice_qr")
+  einvoiceAck       String?   @map("einvoice_ack")
+  // E-Way Bill fields
+  ewayBillNo        String?   @map("eway_bill_no")
+  ewayBillDate      DateTime? @map("eway_bill_date")
+  ewayBillValid     DateTime? @map("eway_bill_valid")
+  transportDocNo    String?   @map("transport_doc_no")
+  vehicleNo         String?   @map("vehicle_no")
+  // Payment tracking
+  paymentMethod     String?   @map("payment_method")
+  payments          Json?
+  paidAmount        Float?    @map("paid_amount")
+  placeOfSupply     String?   @map("place_of_supply")
+  customerState     String?   @map("customer_state")
+  customerPan       String?   @map("customer_pan")
+  company           Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([createdBy])
+  @@map("invoices")
+}
+
+model Quote {
+  id           String    @id @default(uuid())
+  quoteNumber  String    @unique @map("quote_number")
+  customerId   String?   @map("customer_id")
+  customerName String?   @map("customer_name")
+  items        Json?
+  subtotal     Float?
+  tax          Float?
+  discount     Float?    @default(0)
+  total        Float?
+  status       String    @default("draft")
+  validUntil   DateTime? @map("valid_until")
+  notes        String?
+  companyId    String?   @map("company_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  companyRef   Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("quotes")
+}
+
+model SalesOrder {
+  id           String    @id @default(uuid())
+  orderNumber  String    @unique @map("order_number")
+  customerId   String?   @map("customer_id")
+  customerName String?   @map("customer_name")
+  items        Json?
+  subtotal     Float?
+  tax          Float?
+  discount     Float?    @default(0)
+  total        Float?
+  status       String    @default("pending")
+  orderDate    DateTime? @map("order_date")
+  deliveryDate DateTime? @map("delivery_date")
+  notes        String?
+  companyId    String?   @map("company_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  companyRef   Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("sales_orders")
+}
+
+model PurchaseOrder {
+  id           String    @id @default(uuid())
+  poNumber     String    @unique @map("po_number")
+  vendorId     String?   @map("vendor_id")
+  vendorName   String?   @map("vendor_name")
+  items        Json?
+  subtotal     Float?
+  tax          Float?
+  discount     Float?    @default(0)
+  total        Float?
+  status       String    @default("draft")
+  orderDate    DateTime? @map("order_date")
+  expectedDate DateTime? @map("expected_date")
+  notes        String?
+  companyId    String?   @map("company_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  companyRef   Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("purchase_orders")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      String    @default("pending")
+  priority    String    @default("medium")
+  dueDate     DateTime? @map("due_date")
+  assignedTo  String?   @map("assigned_to")
+  projectId   String?   @map("project_id")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("tasks")
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  status      String    @default("active")
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  budget      Float?
+  managerId   String?   @map("manager_id")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("projects")
+}
+
+model Expense {
+  id          String   @id @default(uuid())
+  category    String
+  description String?
+  amount      Float
+  date        DateTime
+  receipt     String?
+  status      String   @default("pending")
+  approvedBy  String?  @map("approved_by")
+  companyId   String?  @map("company_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("expenses")
+}
+
+model Vendor {
+  id         String   @id @default(uuid())
+  name       String
+  email      String?
+  phone      String?
+  company    String?
+  address    String?
+  gstNumber  String?  @map("gst_number")
+  status     String   @default("active")
+  notes      String?
+  companyId  String?  @map("company_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  companyRef Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("vendors")
+}
+
+model StockItem {
+  id           String   @id @default(uuid())
+  name         String
+  sku          String?
+  quantity     Int      @default(0)
+  unit         String?  @default("pcs")
+  minStock     Int      @default(0) @map("min_stock")
+  maxStock     Int?     @map("max_stock")
+  location     String?
+  status       String   @default("active")
+  companyId    String?  @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  reorderLevel Int      @default(0) @map("reorder_level")
+  company      Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("stock_items")
+}
+
+model Warehouse {
+  id        String   @id @default(uuid())
+  name      String
+  location  String?
+  manager   String?
+  capacity  Int?
+  status    String   @default("active")
+  companyId String?  @map("company_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("warehouses")
+}
+
+model BlogPost {
+  id            String         @id @default(uuid())
+  title         String
+  slug          String         @unique
+  content       String?
+  excerpt       String?
+  author        String?
+  authorName    String?        @map("author_name")
+  status        String         @default("draft")
+  publishedAt   DateTime?      @map("published_at")
+  tags          Json?
+  companyId     String?        @map("company_id")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  category      String?
+  featuredImage String?        @map("featured_image")
+  scheduledAt   DateTime?      @map("scheduled_at")
+  // Analytics fields (added so blog-analytics + conversion-tracking routes compile)
+  views         Int            @default(0)
+  avgTimeOnPage Float?         @map("avg_time_on_page")
+  ctaClicks     Int            @default(0) @map("cta_clicks")
+  conversions   Int            @default(0)
+  bounceRate    Float?         @map("bounce_rate")
+  company       Company?       @relation(fields: [companyId], references: [id])
+  schedules     BlogSchedule[]
+
+  @@index([companyId])
+  @@map("blog_posts")
+}
+
+model EmailCampaign {
+  id         String    @id @default(uuid())
+  name       String
+  subject    String?
+  content    String?
+  recipients Json?
+  status     String    @default("draft")
+  sentAt     DateTime? @map("sent_at")
+  sentCount  Int       @default(0) @map("sent_count")
+  companyId  String?   @map("company_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  company    Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("email_campaigns")
+}
+
+model HelpdeskTicket {
+  id           String   @id @default(uuid())
+  ticketNumber String   @unique @map("ticket_number")
+  subject      String
+  description  String?
+  priority     String   @default("medium")
+  status       String   @default("open")
+  category     String?
+  assignedTo   String?  @map("assigned_to")
+  customerId   String?  @map("customer_id")
+  resolution   String?
+  companyId    String?  @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  company      Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("helpdesk_tickets")
+}
+
+model KnowledgeArticle {
+  id        String   @id @default(uuid())
+  title     String
+  content   String?
+  category  String?
+  tags      Json?
+  author    String?
+  status    String   @default("published")
+  views     Int      @default(0)
+  companyId String?  @map("company_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("knowledge_articles")
+}
+
+model CalendarEvent {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  startTime   DateTime  @map("start_time")
+  endTime     DateTime? @map("end_time")
+  location    String?
+  attendees   Json?
+  status      String    @default("scheduled")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("calendar_events")
+}
+
+model Document {
+  id              String    @id @default(uuid())
+  name            String
+  type            String?
+  url             String?
+  size            Int?
+  category        String?
+  tags            Json?
+  uploadedBy      String?   @map("uploaded_by")
+  companyId       String?   @map("company_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  company         Company?  @relation(fields: [companyId], references: [id])
+
+  // CLOUDINARY FIELDS
+  cloudinaryPublicId   String?  @map("cloudinary_public_id")
+  cloudinaryUrl        String?  @map("cloudinary_url")
+  cloudinaryThumbnail  String?  @map("cloudinary_thumbnail")
+  resourceType         String?  @map("resource_type") // image, raw, video
+  format               String?  // pdf, png, jpg, docx
+
+  // VERIFICATION WORKFLOW
+  verificationStatus   String?  @default("pending") @map("verification_status") // pending, approved, rejected, resubmit
+  verifiedBy           String?  @map("verified_by")
+  verifiedAt           DateTime? @map("verified_at")
+  rejectionReason      String?  @map("rejection_reason")
+  reviewerNote         String?  @map("reviewer_note")
+
+  @@index([companyId])
+  @@index([verificationStatus])
+  @@map("documents")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String?
+  type      String   @default("info")
+  read      Boolean  @default(false)
+  userId    String?  @map("user_id")
+  companyId String?  @map("company_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([userId])
+  @@map("notifications")
+}
+
+model Subscription {
+  id                  String    @id @default(uuid())
+  plan                String?
+  planName            String?   @map("plan_name")
+  status              String    @default("pending")
+  startDate           DateTime? @map("start_date")
+  endDate             DateTime? @map("end_date")
+  amount              Float?
+  currency            String    @default("INR")
+  billingCycle        String?   @map("billing_cycle")
+  paymentMethod       String?   @map("payment_method")
+  paymentId           String?   @map("payment_id")
+  companyId           String?   @map("company_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  apps                Json?
+  toolsIncluded       Json?     @map("tools_included")
+  currentPeriodEnd    DateTime? @map("current_period_end")
+  partnerCode         String?   @map("partner_code")
+  trialEndsAt         DateTime? @map("trial_ends_at")
+  userId              String?   @map("user_id")
+  monthlyCreditGrant  Int       @default(0) @map("monthly_credit_grant")
+  creditsRefreshedAt  DateTime? @map("credits_refreshed_at")
+  company             Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Automation {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  trigger     String?
+  actions     Json?
+  status      String   @default("active")
+  companyId   String?  @map("company_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   String?  @map("created_by")
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([createdBy])
+  @@map("automations")
+}
+
+model ComplianceTask {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  category    String?
+  dueDate     DateTime? @map("due_date")
+  status      String    @default("pending")
+  assignedTo  String?   @map("assigned_to")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("compliance_tasks")
+}
+
+model PayrollRun {
+  id          String   @id @default(uuid())
+  period      String
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  totalAmount Float    @map("total_amount")
+  status      String   @default("draft")
+  processedBy String?  @map("processed_by")
+  companyId   String?  @map("company_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("payroll_runs")
+}
+
+model LeaveRequest {
+  id           String   @id @default(uuid())
+  employeeId   String?  @map("employee_id")
+  employeeName String?  @map("employee_name")
+  leaveType    String   @map("leave_type")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime @map("end_date")
+  reason       String?
+  status       String   @default("pending")
+  approvedBy   String?  @map("approved_by")
+  companyId    String?  @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  company      Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("leave_requests")
+}
+
+model Timesheet {
+  id           String   @id @default(uuid())
+  employeeId   String?  @map("employee_id")
+  employeeName String?  @map("employee_name")
+  date         DateTime
+  hours        Float
+  project      String?
+  task         String?
+  notes        String?
+  status       String   @default("draft")
+  companyId    String?  @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  company      Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("timesheets")
+}
+
+model Attendance {
+  id           String    @id @default(uuid())
+  employeeId   String?   @map("employee_id")
+  employeeName String?   @map("employee_name")
+  date         DateTime
+  checkIn      DateTime? @map("check_in")
+  checkOut     DateTime? @map("check_out")
+  status       String    @default("present")
+  notes        String?
+  companyId    String?   @map("company_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  company      Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("attendance")
+}
+
+model ServiceRequest {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  category    String?
+  priority    String   @default("medium")
+  status      String   @default("open")
+  customerId  String?  @map("customer_id")
+  assignedTo  String?  @map("assigned_to")
+  companyId   String?  @map("company_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  company     Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("service_requests")
+}
+
+model Candidate {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  position  String?
+  resume    String?
+  status    String   @default("applied")
+  source    String?
+  notes     String?
+  companyId String?  @map("company_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("candidates")
+}
+
+model FollowUp {
+  id          String    @id @default(uuid())
+  contactId   String?   @map("contact_id")
+  contactName String?   @map("contact_name")
+  type        String?
+  notes       String?
+  dueDate     DateTime? @map("due_date")
+  status      String    @default("pending")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("follow_ups")
+}
+
+model GeneratedSite {
+  id           String   @id @default(uuid())
+  name         String?
+  domain       String?
+  template     String?
+  config       Json?
+  status       String   @default("active")
+  companyId    String?  @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  businessName String?  @map("business_name")
+  createdBy    String?  @map("created_by")
+  description  String?
+  html         String?
+  industry     String?
+  primaryColor String?  @map("primary_color")
+  siteType     String?  @map("site_type")
+  theme        String?
+  company      Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("generated_sites")
+}
+
+model AIChatSession {
+  id        String   @id @default(uuid())
+  title     String?
+  messages  Json?
+  status    String   @default("active")
+  userId    String?  @map("user_id")
+  companyId String?  @map("company_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  context   Json?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("ai_chat_sessions")
+}
+
+model ToolRun {
+  id           String   @id @default(uuid())
+  toolName     String?  @map("tool_name")
+  input        Json?
+  output       Json?
+  status       String   @default("completed")
+  duration     Int?
+  userId       String?  @map("user_id")
+  companyId    String?  @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  aiUsed       Boolean  @default(false) @map("ai_used")
+  businessName String?  @map("business_name")
+  createdBy    String?  @map("created_by")
+  inputs       Json?
+  serviceName  String?  @map("service_name")
+  tool         String?
+  company      Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([createdBy])
+  @@map("tool_runs")
+}
+
+model Tool {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  category    String?
+  creditCost  Int      @default(1) @map("credit_cost")
+  isActive    Boolean  @default(true) @map("is_active")
+  iconUrl     String?  @map("icon_url")
+  handlerCode String?  @map("handler_code")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("tools")
+}
+
+model CreditBalance {
+  companyId String   @id @map("company_id")
+  balance   Int      @default(100)
+  updatedAt DateTime @updatedAt @map("updated_at")
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  @@map("credit_balances")
+}
+
+model CreditTransaction {
+  id           String   @id @default(uuid())
+  companyId    String   @map("company_id")
+  type         String
+  amount       Int
+  balanceAfter Int      @map("balance_after")
+  description  String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  company      Company  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([createdAt])
+  @@map("credit_transactions")
+}
+
+model ConnectedWebsite {
+  id                   String             @id @default(uuid())
+  url                  String
+  name                 String?
+  description          String?
+  techStack            String?            @map("tech_stack")
+  niche                String?
+  topics               Json?
+  brandVoice           String?            @map("brand_voice")
+  competitors          Json?
+  pageLinks            Json?              @map("page_links")
+  publishMethod        String             @default("ainos") @map("publish_method")
+  webhookUrl           String?            @map("webhook_url")
+  webhookSecret        String?            @map("webhook_secret")
+  wordpressUrl         String?            @map("wordpress_url")
+  wordpressUsername    String?            @map("wordpress_username")
+  wordpressAppPassword String?            @map("wordpress_app_password")
+  deliveryEmail        String?            @map("delivery_email")
+  isActive             Boolean            @default(true) @map("is_active")
+  widgetIntegrated     Boolean            @default(false) @map("widget_integrated")
+  widgetIntegratedAt   DateTime?          @map("widget_integrated_at")
+  companyId            String?            @map("company_id")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  // Social auto-share credentials (added so the production DB can store them)
+  linkedinAccessToken  String?            @map("linkedin_access_token")
+  linkedinCompanyId    String?            @map("linkedin_company_id")
+  twitterApiKey        String?            @map("twitter_api_key")
+  twitterApiSecret     String?            @map("twitter_api_secret")
+  twitterAccessToken   String?            @map("twitter_access_token")
+  twitterAccessSecret  String?            @map("twitter_access_secret")
+  autoShareLinkedin    Boolean            @default(false) @map("auto_share_linkedin")
+  autoShareTwitter     Boolean            @default(false) @map("auto_share_twitter")
+  schedules            BlogSchedule[]
+  subscriptions        BlogSubscription[]
+  company              Company?           @relation(fields: [companyId], references: [id])
+
+  @@unique([url, companyId])
+  @@index([companyId])
+  @@index([url])
+  @@map("connected_websites")
+}
+
+model BlogSubscription {
+  id                 String            @id @default(uuid())
+  plan               String            @default("standard")
+  blogsPerMonth      Int               @default(30) @map("blogs_per_month")
+  blogsUsed          Int               @default(0) @map("blogs_used")
+  blogsRemaining     Int               @default(30) @map("blogs_remaining")
+  startDate          DateTime?         @map("start_date")
+  currentPeriodEnd   DateTime?         @map("current_period_end")
+  autoSchedule       Boolean           @default(true) @map("auto_schedule")
+  schedulePattern    String            @default("daily") @map("schedule_pattern")
+  connectedWebsiteId String?           @map("connected_website_id")
+  companyId          String?           @map("company_id")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+  schedules          BlogSchedule[]
+  company            Company?          @relation(fields: [companyId], references: [id])
+  connectedWebsite   ConnectedWebsite? @relation(fields: [connectedWebsiteId], references: [id])
+
+  @@index([companyId])
+  @@index([connectedWebsiteId])
+  @@map("blog_subscriptions")
+}
+
+model BlogSchedule {
+  id                 String            @id @default(uuid())
+  topic              String
+  keywords           String?
+  tone               String            @default("Professional")
+  targetWordCount    Int               @default(3000) @map("target_word_count")
+  scheduledDate      DateTime          @map("scheduled_date")
+  status             String            @default("pending")
+  blogPostId         String?           @map("blog_post_id")
+  subscriptionId     String?           @map("subscription_id")
+  publishTargets     Json?             @map("publish_targets")
+  wordpressPostId    String?           @map("wordpress_post_id")
+  webhookResponse    Json?             @map("webhook_response")
+  emailSentAt        DateTime?         @map("email_sent_at")
+  companyId          String?           @map("company_id")
+  connectedWebsiteId String?           @map("connected_website_id")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+  previewImage       String?           @map("preview_image")
+  blogPost           BlogPost?         @relation(fields: [blogPostId], references: [id])
+  company            Company?          @relation(fields: [companyId], references: [id])
+  connectedWebsite   ConnectedWebsite? @relation(fields: [connectedWebsiteId], references: [id])
+  subscription       BlogSubscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([companyId])
+  @@index([subscriptionId])
+  @@index([connectedWebsiteId])
+  @@index([scheduledDate])
+  @@index([status])
+  @@map("blog_schedules")
+}
+
+model DeliveryChallan {
+  id              String    @id @default(uuid())
+  challanNumber   String    @unique @map("challan_number")
+  customerId      String?   @map("customer_id")
+  customerName    String    @map("customer_name")
+  customerAddress String?   @map("customer_address")
+  customerGst     String?   @map("customer_gst")
+  customerState   String?   @map("customer_state")
+  items           Json?
+  subtotal        Float?
+  cgstAmount      Float?    @map("cgst_amount")
+  sgstAmount      Float?    @map("sgst_amount")
+  igstAmount      Float?    @map("igst_amount")
+  taxTotal        Float?    @map("tax_total")
+  totalAmount     Float?    @map("total_amount")
+  status          String    @default("open")
+  invoiceId       String?   @map("invoice_id")
+  deliveryDate    DateTime? @map("delivery_date")
+  vehicleNo       String?   @map("vehicle_no")
+  transportDocNo  String?   @map("transport_doc_no")
+  notes           String?
+  supplyType      String?   @map("supply_type")
+  companyId       String?   @map("company_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  company         Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("delivery_challans")
+}
+
+model InvoiceTemplate {
+  id              String   @id @default(uuid())
+  name            String
+  isDefault       Boolean  @default(false)
+  // Branding
+  primaryColor    String   @default("#6D28D9") @map("primary_color")
+  secondaryColor  String   @default("#8B5CF6") @map("secondary_color")
+  backgroundColor String   @default("#FFFFFF") @map("background_color")
+  textColor       String   @default("#1F2937") @map("text_color")
+  // Typography
+  fontFamily      String   @default("Helvetica") @map("font_family")
+  fontSize        String   @default("medium") @map("font_size")
+  // Layout
+  layout          String   @default("standard") // standard, compact, modern, minimal
+  showLogo        Boolean  @default(true) @map("show_logo")
+  logoSize        String   @default("medium") @map("logo_size")
+  logoPosition    String   @default("left") @map("logo_position")
+  // Content
+  showQrCode      Boolean  @default(false) @map("show_qr_code")
+  showBankDetails Boolean  @default(true) @map("show_bank_details")
+  showTerms       Boolean  @default(true) @map("show_terms")
+  terms           String?
+  notes           String?
+  headerText      String?  @map("header_text")
+  footerText      String?  @map("footer_text")
+  // Accent
+  accentWidth     String   @default("thin") @map("accent_width")
+  borderRadius    String   @default("medium") @map("border_radius")
+  // Tenant
+  companyId       String?  @map("company_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  company         Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("invoice_templates")
+}
+
+model ToolActivation {
+  id            String    @id @default(uuid())
+  companyId     String    @map("company_id")
+  toolName      String    @map("tool_name")
+  activated     Boolean   @default(true)
+  activatedBy   String?   @map("activated_by")
+  activatedAt   DateTime  @default(now()) @map("activated_at")
+  deactivatedAt DateTime? @map("deactivated_at")
+  reason        String?
+  
+  company       Company   @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([toolName])
+  @@map("tool_activations")
+}
+
+// ══════════════════════════════════════════
+// ACCOUNTING MODELS (Chart of Accounts, Ledger)
+// ═══════════════════════════════════════════
+
+model Account {
+  id          String    @id @default(uuid())
+  code        String    @unique
+  name        String
+  type        String    // asset, liability, equity, income, expense
+  parentId    String?   @map("parent_id")
+  balance     Float     @default(0)
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  company     Company?  @relation(fields: [companyId], references: [id])
+  parent      Account?  @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children    Account[] @relation("AccountHierarchy")
+  entries     LedgerEntry[]
+
+  @@index([companyId])
+  @@index([type])
+  @@map("accounts")
+}
+
+model JournalEntry {
+  id          String    @id @default(uuid())
+  date        DateTime
+  description String?
+  reference   String?   // invoice number, etc.
+  status      String    @default("posted") // draft, posted, void
+  companyId   String?   @map("company_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  entries     LedgerEntry[]
+  company     Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([date])
+  @@map("journal_entries")
+}
+
+model LedgerEntry {
+  id          String   @id @default(uuid())
+  journalId   String   @map("journal_id")
+  accountId   String   @map("account_id")
+  debit       Float    @default(0)
+  credit      Float    @default(0)
+  description String?
+  journal     JournalEntry @relation(fields: [journalId], references: [id])
+  account     Account      @relation(fields: [accountId], references: [id])
+
+  @@index([journalId])
+  @@index([accountId])
+  @@map("ledger_entries")
+}
+
+// ═══════════════════════════════════════════
+// CREDIT / DEBIT NOTES
+// ═══════════════════════════════════════════
+
+model CreditNote {
+  id            String   @id @default(uuid())
+  noteNumber    String   @unique @map("note_number")
+  customerId    String?  @map("customer_id")
+  customerName  String?  @map("customer_name")
+  invoiceId     String?  @map("invoice_id")
+  items         Json?
+  subtotal      Float?
+  tax           Float?
+  cgstAmount    Float?   @map("cgst_amount")
+  sgstAmount    Float?   @map("sgst_amount")
+  igstAmount    Float?   @map("igst_amount")
+  total         Float?
+  reason        String?
+  status        String   @default("draft")
+  companyId     String?  @map("company_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  company       Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("credit_notes")
+}
+
+model DebitNote {
+  id            String   @id @default(uuid())
+  noteNumber    String   @unique @map("note_number")
+  vendorId      String?  @map("vendor_id")
+  vendorName    String?  @map("vendor_name")
+  purchaseId    String?  @map("purchase_id")
+  items         Json?
+  subtotal      Float?
+  tax           Float?
+  cgstAmount    Float?   @map("cgst_amount")
+  sgstAmount    Float?   @map("sgst_amount")
+  igstAmount    Float?   @map("igst_amount")
+  total         Float?
+  reason        String?
+  status        String   @default("draft")
+  companyId     String?  @map("company_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  company       Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@map("debit_notes")
+}
+
+// ═══════════════════════════════════════════
+// RECURRING INVOICES
+// ═══════════════════════════════════════════
+
+model RecurringInvoice {
+  id            String   @id @default(uuid())
+  customerId    String?  @map("customer_id")
+  customerName  String?  @map("customer_name")
+  items         Json?
+  frequency     String   // daily, weekly, monthly, quarterly, yearly
+  startDate     DateTime @map("start_date")
+  endDate       DateTime? @map("end_date")
+  nextRunDate   DateTime @map("next_run_date")
+  status        String   @default("active") // active, paused, completed
+  lastInvoiceId String?  @map("last_invoice_id")
+  notes         String?
+  companyId     String?  @map("company_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  company       Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([nextRunDate])
+  @@index([status])
+  @@map("recurring_invoices")
+}
+
+// ═══════════════════════════════════════════
+// BANK ACCOUNTS & RECONCILIATION
+// ══════════════════════════════════════════
+
+model BankAccount {
+  id            String   @id @default(uuid())
+  name          String
+  accountNumber String   @map("account_number")
+  ifscCode      String?  @map("ifsc_code")
+  bankName      String?  @map("bank_name")
+  balance       Float    @default(0)
+  companyId     String?  @map("company_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  company       Company? @relation(fields: [companyId], references: [id])
+  transactions  BankTransaction[]
+
+  @@index([companyId])
+  @@map("bank_accounts")
+}
+
+model BankTransaction {
+  id            String    @id @default(uuid())
+  accountId     String    @map("account_id")
+  date          DateTime
+  description   String?
+  debit         Float     @default(0)
+  credit        Float     @default(0)
+  balance       Float?
+  reference     String?
+  matched       Boolean   @default(false)
+  matchedWith   String?   @map("matched_with") // invoice ID or expense ID
+  companyId     String?   @map("company_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  account       BankAccount @relation(fields: [accountId], references: [id])
+  company       Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([accountId])
+  @@index([companyId])
+  @@index([date])
+  @@map("bank_transactions")
+}
+
+// ═══════════════════════════════════════════
+// ONBOARDING AUDIT LOG
+// ═══════════════════════════════════════════
+
+model OnboardingAudit {
+  id          String   @id @default(uuid())
+  companyId   String   @map("company_id")
+  action      String   // docs_uploaded, docs_submitted, review_started, approved, rejected, resubmit_requested, suspended
+  performedBy String?  @map("performed_by") // admin userId or 'system'
+  performedByName String? @map("performed_by_name")
+  notes       String?
+  metadata    Json?    // extra context: which docs, rejection reasons, etc.
+  createdAt   DateTime @default(now()) @map("created_at")
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("onboarding_audits")
+}
