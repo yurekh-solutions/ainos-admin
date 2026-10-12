@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Building2, FileCheck, Users,
-  HelpCircle, ChevronDown, Shield
+  HelpCircle, ChevronDown, Shield, X
 } from 'lucide-react';
 
 interface SidebarProps {
   user: { email: string; name?: string } | null;
   pendingCount?: number;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const navItems = [
@@ -20,12 +22,24 @@ const navItems = [
   { href: '/dashboard/users', label: 'Users', icon: Users },
 ];
 
-export default function Sidebar({ user, pendingCount = 0 }: SidebarProps) {
+export default function Sidebar({ user, pendingCount = 0, isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
 
-  return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#0f0f1a] border-r border-[#2a2a35] flex flex-col z-40">
+  const sidebarContent = (
+    <>
+      {/* Close button (mobile) */}
+      {onClose && (
+        <div className="absolute top-4 right-4 lg:hidden">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-[#1a1a24] transition-colors"
+          >
+            <X className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+          </button>
+        </div>
+      )}
+
       {/* Workspace Selector */}
       <div className="p-4 border-b border-[#2a2a35]">
         <button
@@ -54,6 +68,7 @@ export default function Sidebar({ user, pendingCount = 0 }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                 isActive
                   ? 'bg-purple-600/20 text-purple-400 border border-purple-600/30'
@@ -109,6 +124,32 @@ export default function Sidebar({ user, pendingCount = 0 }: SidebarProps) {
           </div>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isOpen && onClose && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Desktop: always visible fixed sidebar */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-[#0f0f1a] border-r border-[#2a2a35] flex-col z-40">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile: slide-in drawer */}
+      <aside
+        className={`lg:hidden fixed left-0 top-0 h-screen w-72 bg-[#0f0f1a] border-r border-[#2a2a35] flex-col z-50 transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

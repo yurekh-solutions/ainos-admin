@@ -20,6 +20,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -32,7 +33,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     if (user) fetchUsers();
-  }, [user, page]);
+  }, [user, page, search]);
 
   const checkAuth = async () => {
     try {
@@ -86,10 +87,10 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
-      <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} />
+      <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="ml-64">
-        <TopBar user={user} title="Users" subtitle="Workspace" />
+      <div className="lg:ml-64">
+        <TopBar user={user} title="Users" subtitle="Workspace" onMenuToggle={() => setSidebarOpen(true)} />
 
         <main className="p-6 max-w-[1600px]">
           {/* Header */}

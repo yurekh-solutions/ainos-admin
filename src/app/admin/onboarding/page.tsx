@@ -7,8 +7,9 @@ import {
   ShieldCheck, Building2, FileText, Clock, CheckCircle2, XCircle,
   Eye, ChevronRight, Search, Filter, Users,
   ArrowLeft, ExternalLink, RefreshCw, Mail, Phone, Globe, MapPin,
-  Calendar, Hash, UserCircle, Ban, X, Download, Loader2
+  Calendar, Hash, UserCircle, Ban, X, Download, Loader2, Menu
 } from 'lucide-react';
+import Sidebar from '@/components/Sidebar';
 
 interface CompanySummary {
   id: string;
@@ -253,6 +254,7 @@ export default function AdminOnboardingPage() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<DocumentRecord | null>(null);
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 0 });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -375,10 +377,18 @@ export default function AdminOnboardingPage() {
     const StatusIcon = statusConf.icon;
 
     return (
-      <div className="min-h-screen text-[hsl(var(--foreground))]">
+      <div className="min-h-screen bg-[#0a0a0f] text-[hsl(var(--foreground))]">
+        <Sidebar user={user} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="lg:ml-64">
         {/* Header */}
         <div className="border-b border-[hsl(var(--border))] bg-[hsl(var(--card))/0.8] backdrop-blur-xl sticky top-0 z-30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-xl hover:bg-[hsl(var(--muted))] transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <button
               onClick={() => { setSelectedCompany(null); setDocuments([]); setAudits([]); }}
               className="p-2 rounded-xl hover:bg-[hsl(var(--muted))] transition-colors"
@@ -667,6 +677,7 @@ export default function AdminOnboardingPage() {
             </div>
           )}
         </div>
+        </div>
 
         {/* Document Preview Modal */}
         <AnimatePresence>
@@ -730,7 +741,9 @@ export default function AdminOnboardingPage() {
 
   // List view
   return (
-    <div className="min-h-screen text-[hsl(var(--foreground))]">
+    <div className="min-h-screen bg-[#0a0a0f] text-[hsl(var(--foreground))]">
+      <Sidebar user={user} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="lg:ml-64">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -853,6 +866,7 @@ export default function AdminOnboardingPage() {
             })}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

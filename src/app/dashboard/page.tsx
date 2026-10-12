@@ -43,6 +43,7 @@ export default function DashboardPage() {
   const [companies, setCompanies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -110,10 +111,10 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
-      <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} />
+      <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="ml-64">
-        <TopBar user={user} title="Overview" subtitle="Workspace" />
+      <div className="lg:ml-64">
+        <TopBar user={user} title="Overview" subtitle="Workspace" onMenuToggle={() => setSidebarOpen(true)} />
         
         <main className="p-6 max-w-[1600px]">
           {/* Header Section */}

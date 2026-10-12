@@ -1,22 +1,31 @@
 'use client';
 
-import { Search, Bell, Command } from 'lucide-react';
+import { Search, Bell, Command, Menu } from 'lucide-react';
 
 interface TopBarProps {
   user: { email: string; name?: string } | null;
   title?: string;
   subtitle?: string;
+  onMenuToggle?: () => void;
 }
 
-export default function TopBar({ user, title = 'Overview', subtitle = 'Workspace' }: TopBarProps) {
+export default function TopBar({ user, title = 'Overview', subtitle = 'Workspace', onMenuToggle }: TopBarProps) {
   return (
     <header className="sticky top-0 z-30 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-[#2a2a35]">
-      <div className="flex items-center justify-between px-6 py-3">
-        {/* Left: Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-[hsl(var(--muted-foreground))]">{subtitle}</span>
-          <span className="text-[hsl(var(--muted-foreground))]">/</span>
-          <span className="text-white font-medium">{title}</span>
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3">
+        {/* Left: Hamburger + Breadcrumb */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onMenuToggle}
+            className="lg:hidden p-2 rounded-lg hover:bg-[#1a1a24] transition-colors"
+          >
+            <Menu className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+          </button>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-[hsl(var(--muted-foreground))]">{subtitle}</span>
+            <span className="text-[hsl(var(--muted-foreground))]">/</span>
+            <span className="text-white font-medium">{title}</span>
+          </div>
         </div>
 
         {/* Right: Search + Notifications + Avatar */}

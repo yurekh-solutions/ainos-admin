@@ -40,6 +40,7 @@ export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -53,7 +54,7 @@ export default function CompaniesPage() {
 
   useEffect(() => {
     if (user) fetchCompanies();
-  }, [user, filter, page]);
+  }, [user, filter, page, search]);
 
   const checkAuth = async () => {
     try {
@@ -116,10 +117,10 @@ export default function CompaniesPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
-      <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} />
+      <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="ml-64">
-        <TopBar user={user} title="Companies" subtitle="Workspace" />
+      <div className="lg:ml-64">
+        <TopBar user={user} title="Companies" subtitle="Workspace" onMenuToggle={() => setSidebarOpen(true)} />
 
         <main className="p-6 max-w-[1600px]">
           {/* Header */}
