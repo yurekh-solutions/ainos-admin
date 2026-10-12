@@ -194,7 +194,7 @@ export default function DashboardPage() {
 
             {/* Performance Chart */}
             <div className="mb-8">
-              <PerformanceChart data={stats.chartData} lastMonthData={stats.lastMonthChartData} />
+              <PerformanceChart data={stats?.chartData ?? []} lastMonthData={stats?.lastMonthChartData ?? []} />
             </div>
 
             {/* Companies Table + Activity Feed */}
@@ -203,7 +203,7 @@ export default function DashboardPage() {
                 <CompaniesTable companies={companies} />
               </div>
               <div>
-                <ActivityFeed activities={stats.activities} />
+                <ActivityFeed activities={stats?.activities ?? []} />
               </div>
             </div>
           </div>
