@@ -94,6 +94,26 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  const handleExportReport = () => {
+    if (!stats) return;
+    const rows = [
+      ['Metric', 'Value', 'Change vs Last Month'],
+      ['Total Companies', stats.totalCompanies, `${stats.changes.companies}%`],
+      ['Pending Approvals', stats.pendingApprovals, `${stats.changes.pending}%`],
+      ['Approved Companies', stats.approvedCompanies, `${stats.changes.approved}%`],
+      ['Total Users', stats.totalUsers, `${stats.changes.users}%`],
+      ['Total Documents', stats.totalDocuments, '-'],
+    ];
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ainos-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
@@ -132,13 +152,13 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-[#1a1a24] border border-[#2a2a35] rounded-lg text-sm text-white hover:bg-[#2a2a35] transition-colors">
+                <button onClick={handleExportReport} className="flex items-center gap-2 px-4 py-2 bg-[#1a1a24] border border-[#2a2a35] rounded-lg text-sm text-white hover:bg-[#2a2a35] transition-colors">
                   <Download className="w-4 h-4" />
                   Export report
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 rounded-lg text-sm text-white hover:bg-purple-700 transition-colors">
+                <button onClick={() => router.push('/dashboard/companies')} className="flex items-center gap-2 px-4 py-2 bg-purple-600 rounded-lg text-sm text-white hover:bg-purple-700 transition-colors">
                   <Plus className="w-4 h-4" />
-                  New consultation
+                  View Companies
                 </button>
               </div>
             </div>
