@@ -35,6 +35,21 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
+/* Hide scrollbars globally */
+*,
+*::before,
+*::after {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+*::-webkit-scrollbar,
+*::before::-webkit-scrollbar,
+*::after::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 .glass-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));

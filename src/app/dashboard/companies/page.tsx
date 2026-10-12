@@ -177,7 +177,7 @@ export default function CompaniesPage() {
 
           {/* Table */}
           <div className="bg-[#1a1a24] border border-[#2a2a35] rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#2a2a35]">

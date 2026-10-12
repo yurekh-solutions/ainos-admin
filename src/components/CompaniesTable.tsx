@@ -76,7 +76,7 @@ export default function CompaniesTable({ companies }: CompaniesTableProps) {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#2a2a35]">
