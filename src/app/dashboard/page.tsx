@@ -75,10 +75,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[hsl(var(--background))] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+          <p className="mt-4 text-[hsl(var(--muted-foreground))]">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -89,18 +89,18 @@ export default function DashboardPage() {
   }
 
   const statusColors: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-800',
-    docs_submitted: 'bg-blue-100 text-blue-800',
-    under_review: 'bg-purple-100 text-purple-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-    suspended: 'bg-gray-100 text-gray-800',
+    pending: 'bg-amber-950 text-amber-300',
+    docs_submitted: 'bg-blue-950 text-blue-300',
+    under_review: 'bg-purple-950 text-purple-300',
+    approved: 'bg-green-950 text-green-300',
+    rejected: 'bg-red-950 text-red-300',
+    suspended: 'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]',
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[hsl(var(--background))]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-[hsl(var(--card))] border-b border-[hsl(var(--border))] sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -108,8 +108,8 @@ export default function DashboardPage() {
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">AINOS Admin</h1>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <h1 className="text-xl font-bold text-[hsl(var(--foreground))]">AINOS Admin</h1>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">{user?.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -121,7 +121,7 @@ export default function DashboardPage() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
@@ -136,62 +136,62 @@ export default function DashboardPage() {
         {/* Stats Grid */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 rounded-lg bg-blue-950 flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-blue-400" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.totalCompanies}</h3>
-              <p className="text-sm text-gray-500">Total Companies</p>
+              <h3 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-1">{stats.totalCompanies}</h3>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">Total Companies</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-amber-600" />
+                <div className="w-12 h-12 rounded-lg bg-amber-950 flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.pendingApprovals}</h3>
-              <p className="text-sm text-gray-500">Pending Approvals</p>
+              <h3 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-1">{stats.pendingApprovals}</h3>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">Pending Approvals</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 rounded-lg bg-green-950 flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-green-400" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.approvedCompanies}</h3>
-              <p className="text-sm text-gray-500">Approved</p>
+              <h3 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-1">{stats.approvedCompanies}</h3>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">Approved</p>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 rounded-lg bg-purple-950 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-purple-400" />
                 </div>
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.totalUsers}</h3>
-              <p className="text-sm text-gray-500">Total Users</p>
+              <h3 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-1">{stats.totalUsers}</h3>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">Total Users</p>
             </div>
           </div>
         )}
 
         {/* Recent Companies */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Companies</h2>
+            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">Recent Companies</h2>
             <Link
               href="/admin/onboarding"
-              className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              className="text-sm text-purple-400 hover:text-purple-300 font-medium"
             >
               View All →
             </Link>
           </div>
 
           {recentCompanies.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
               <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>No companies found</p>
             </div>
@@ -200,30 +200,30 @@ export default function DashboardPage() {
               {recentCompanies.map((company) => (
                 <div
                   key={company.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-gray-100 hover:border-purple-200 hover:bg-purple-50 transition-all"
+                  className="flex items-center justify-between p-4 rounded-lg border border-[hsl(var(--border))] hover:border-purple-800 hover:bg-purple-950/30 transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-purple-600" />
+                    <div className="w-10 h-10 rounded-lg bg-purple-950/50 flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900">{company.name}</h3>
-                      <p className="text-sm text-gray-500">{company.email}</p>
+                      <h3 className="font-medium text-[hsl(var(--foreground))]">{company.name}</h3>
+                      <p className="text-sm text-[hsl(var(--muted-foreground))]">{company.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        statusColors[company.onboardingStatus] || 'bg-gray-100 text-gray-800'
+                        statusColors[company.onboardingStatus] || 'bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]'
                       }`}
                     >
                       {company.onboardingStatus.replace('_', ' ')}
                     </span>
                     <Link
                       href={`/admin/onboarding?company=${company.id}`}
-                      className="p-2 hover:bg-white rounded-lg transition-colors"
+                      className="p-2 hover:bg-[hsl(var(--muted))] rounded-lg transition-colors"
                     >
-                      <Eye className="w-4 h-4 text-gray-600" />
+                      <Eye className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
                     </Link>
                   </div>
                 </div>

@@ -3,18 +3,18 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 20% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 15%;
+    --background: 240 10% 4%;
+    --foreground: 0 0% 95%;
+    --card: 240 6% 10%;
+    --card-foreground: 0 0% 95%;
     --primary: 252 60% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 96%;
-    --secondary-foreground: 220 20% 15%;
-    --muted: 220 10% 95%;
-    --muted-foreground: 220 10% 45%;
-    --border: 220 10% 90%;
-    --input: 220 10% 90%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 4% 14%;
+    --muted-foreground: 240 4% 55%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
     --ring: 252 60% 55%;
     --radius: 0.75rem;
   }
@@ -39,7 +39,7 @@ body {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
 }
 
 .btn-primary {
