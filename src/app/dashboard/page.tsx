@@ -20,6 +20,21 @@ interface DashboardStats {
   rejectedCompanies: number;
   totalUsers: number;
   totalDocuments: number;
+  changes: {
+    companies: number;
+    pending: number;
+    approved: number;
+    users: number;
+  };
+  chartData: number[];
+  lastMonthChartData: number[];
+  activities: Array<{
+    id: string;
+    action: string;
+    description: string;
+    timestamp: string;
+    icon: 'approved' | 'rejected' | 'pending' | 'document';
+  }>;
 }
 
 export default function DashboardPage() {
@@ -93,34 +108,6 @@ export default function DashboardPage() {
     return null;
   }
 
-  // Mock activity data (replace with real API data later)
-  const activities = [
-    {
-      id: '1',
-      action: 'Company approved',
-      description: 'for prime vision',
-      timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
-      icon: 'approved' as const,
-    },
-    {
-      id: '2',
-      action: 'Document verified',
-      description: 'for Test Company Pvt Ltd',
-      timestamp: new Date(Date.now() - 48 * 60000).toISOString(),
-      icon: 'document' as const,
-    },
-    {
-      id: '3',
-      action: 'New registration',
-      description: 'Sonia Test Company submitted documents',
-      timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
-      icon: 'pending' as const,
-    },
-  ];
-
-  // Generate sparkline data
-  const sparklineData = [12, 19, 15, 25, 22, 30, 28, 35, 32, 38];
-
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
       <Sidebar user={user} pendingCount={stats?.pendingApprovals || 0} />
@@ -177,37 +164,37 @@ export default function DashboardPage() {
                 <StatCard
                   label="Total Companies"
                   value={stats.totalCompanies}
-                  change={17.5}
+                  change={stats.changes.companies}
                   icon={<Building2 className="w-6 h-6 text-blue-400" />}
-                  sparklineData={sparklineData}
+                  sparklineData={stats.chartData.slice(-7)}
                 />
                 <StatCard
                   label="Pending Approvals"
                   value={stats.pendingApprovals}
-                  change={24.1}
+                  change={stats.changes.pending}
                   icon={<FileText className="w-6 h-6 text-amber-400" />}
-                  sparklineData={sparklineData.map(v => v * 0.8)}
+                  sparklineData={stats.chartData.slice(-7).map(v => v * 0.8)}
                 />
                 <StatCard
                   label="Approved"
                   value={stats.approvedCompanies}
-                  change={17.6}
+                  change={stats.changes.approved}
                   icon={<TrendingUp className="w-6 h-6 text-green-400" />}
-                  sparklineData={sparklineData.map(v => v * 0.6)}
+                  sparklineData={stats.chartData.slice(-7).map(v => v * 0.6)}
                 />
                 <StatCard
                   label="Total Users"
                   value={stats.totalUsers}
-                  change={2.3}
+                  change={stats.changes.users}
                   icon={<Users className="w-6 h-6 text-purple-400" />}
-                  sparklineData={sparklineData.map(v => v * 1.2)}
+                  sparklineData={stats.chartData.slice(-7).map(v => v * 1.2)}
                 />
               </div>
             )}
 
             {/* Performance Chart */}
             <div className="mb-8">
-              <PerformanceChart />
+              <PerformanceChart data={stats.chartData} lastMonthData={stats.lastMonthChartData} />
             </div>
 
             {/* Companies Table + Activity Feed */}
@@ -216,7 +203,7 @@ export default function DashboardPage() {
                 <CompaniesTable companies={companies} />
               </div>
               <div>
-                <ActivityFeed activities={activities} />
+                <ActivityFeed activities={stats.activities} />
               </div>
             </div>
           </div>

@@ -4,19 +4,22 @@ import { useState } from 'react';
 import { Calendar, ChevronDown } from 'lucide-react';
 
 interface PerformanceChartProps {
-  currentMonthData?: number[];
+  data?: number[];
   lastMonthData?: number[];
   labels?: string[];
 }
 
 export default function PerformanceChart({
-  currentMonthData = [12, 19, 15, 25, 22, 30, 28, 35, 32, 38, 36, 42, 40, 45, 43, 48, 46, 50, 48, 52, 50, 55, 53, 58, 56, 60, 58, 62, 60, 65],
-  lastMonthData = [10, 15, 12, 20, 18, 25, 23, 28, 26, 32, 30, 35, 33, 38, 36, 40, 38, 42, 40, 44, 42, 46, 44, 48, 46, 50, 48, 52, 50, 54],
+  data = [],
+  lastMonthData = [],
   labels = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`)
 }: PerformanceChartProps) {
+  // Use real data if available, otherwise fallback to empty arrays
+  const currentMonthData = data.length > 0 ? data : Array(30).fill(0);
+  const prevMonthData = lastMonthData.length > 0 ? lastMonthData : Array(30).fill(0);
   const [dateRange, setDateRange] = useState('This month');
 
-  const max = Math.max(...currentMonthData, ...lastMonthData);
+  const max = Math.max(...currentMonthData, ...prevMonthData, 1);
   const width = 800;
   const height = 300;
   const padding = 40;
@@ -25,7 +28,7 @@ export default function PerformanceChart({
   const getY = (value: number) => height - padding - (value / max) * (height - padding * 2);
 
   const currentPath = currentMonthData.map((value, index) => `${getX(index)},${getY(value)}`).join(' L ');
-  const lastPath = lastMonthData.map((value, index) => `${getX(index)},${getY(value)}`).join(' L ');
+  const lastPath = prevMonthData.map((value, index) => `${getX(index)},${getY(value)}`).join(' L ');
 
   const currentArea = `M ${currentPath} L ${getX(currentMonthData.length - 1)},${height - padding} L ${getX(0)},${height - padding} Z`;
 
