@@ -1,5 +1,5 @@
-ainos-admin: proper password authentication with bcrypt
+Admin onboarding: document warnings + approval guard
 
-- Email: yurekhsolutions@gmail.com
-- Password: admin@123 (bcrypt hashed in ADMIN_PASSWORD_HASH env var)
-- Login route now verifies password before granting access
+- Warning banner when approved company has 0 documents
+- Confirmation dialog before approving company with no documents
+- Improved empty state with amber warning styling

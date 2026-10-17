@@ -7,7 +7,7 @@ import {
   ShieldCheck, Building2, FileText, Clock, CheckCircle2, XCircle,
   Eye, ChevronRight, Search, Filter, Users,
   ArrowLeft, ExternalLink, RefreshCw, Mail, Phone, Globe, MapPin,
-  Calendar, Hash, UserCircle, Ban, X, Download, Loader2, Menu
+  Calendar, Hash, UserCircle, Ban, X, Download, Loader2, Menu, AlertCircle
 } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 
@@ -410,7 +410,12 @@ export default function AdminOnboardingPage() {
             <div className="flex items-center gap-2 flex-shrink-0">
               {selectedCompany.onboardingStatus !== 'approved' && (
                 <button
-                  onClick={() => handleAction(selectedCompany.id, 'approve')}
+                  onClick={() => {
+                    if (documents.length === 0) {
+                      if (!window.confirm('This company has 0 documents uploaded. Approve anyway?')) return;
+                    }
+                    handleAction(selectedCompany.id, 'approve');
+                  }}
                   disabled={actionLoading}
                   className="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50 shadow-sm"
                 >
@@ -436,6 +441,16 @@ export default function AdminOnboardingPage() {
               <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--muted-foreground))]" />
             </div>
           ) : (
+            <>
+              {selectedCompany.onboardingStatus === 'approved' && documents.length === 0 && (
+                <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-800">Approved Without Documents</p>
+                    <p className="text-xs text-amber-700 mt-0.5 font-light">This company was approved with 0 documents. Contact the company to upload required documents from their dashboard.</p>
+                  </div>
+                </div>
+              )}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Company Info */}
               <div className="lg:col-span-1 space-y-5">
@@ -555,8 +570,11 @@ export default function AdminOnboardingPage() {
                   <div className="divide-y divide-[hsl(var(--border))]">
                     {documents.length === 0 ? (
                       <div className="p-10 text-center">
-                        <FileText className="w-8 h-8 text-[hsl(var(--muted-foreground))] mx-auto mb-3 opacity-50" />
-                        <p className="text-sm text-[hsl(var(--muted-foreground))] font-light">No documents uploaded yet</p>
+                        <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4">
+                          <FileText className="w-8 h-8 text-amber-500" />
+                        </div>
+                        <p className="text-sm font-medium text-amber-800">No documents uploaded</p>
+                        <p className="text-xs text-amber-600 mt-1 font-light">This company was approved without any document verification. Ask the company to upload documents from their dashboard.</p>
                       </div>
                     ) : (
                       documents.map(doc => {
@@ -675,6 +693,7 @@ export default function AdminOnboardingPage() {
                 </div>
               </div>
             </div>
+            </>
           )}
         </div>
         </div>
