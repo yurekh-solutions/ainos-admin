@@ -1,1 +1,5 @@
-ainos-admin login: auto-create user for admin emails instead of "User not found"
+ainos-admin: proper password authentication with bcrypt
+
+- Email: yurekhsolutions@gmail.com
+- Password: admin@123 (bcrypt hashed in ADMIN_PASSWORD_HASH env var)
+- Login route now verifies password before granting access

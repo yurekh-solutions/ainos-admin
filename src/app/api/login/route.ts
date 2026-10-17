@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
@@ -14,12 +15,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!password) {
+      return NextResponse.json(
+        { error: 'Password is required' },
+        { status: 400 }
+      );
+    }
+
     // Check if user is admin
     const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
     if (!adminEmails.includes(email)) {
       return NextResponse.json(
         { error: 'Not an admin user' },
         { status: 403 }
+      );
+    }
+
+    // Verify password against stored hash
+    const storedHash = process.env.ADMIN_PASSWORD_HASH;
+    if (!storedHash) {
+      return NextResponse.json(
+        { error: 'Admin password not configured' },
+        { status: 500 }
+      );
+    }
+
+    const valid = await bcrypt.compare(password, storedHash);
+    if (!valid) {
+      return NextResponse.json(
+        { error: 'Invalid password' },
+        { status: 401 }
       );
     }
 
