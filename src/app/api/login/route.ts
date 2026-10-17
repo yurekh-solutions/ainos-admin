@@ -14,26 +14,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user exists and is admin
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { company: true },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 401 }
-      );
-    }
-
     // Check if user is admin
     const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
-    if (!adminEmails.includes(user.email)) {
+    if (!adminEmails.includes(email)) {
       return NextResponse.json(
         { error: 'Not an admin user' },
         { status: 403 }
       );
+    }
+
+    // If admin email not in DB yet, auto-create so login succeeds
+    let user = await prisma.user.findUnique({ where: { email }, include: { company: true } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: { email, name: email.split('@')[0], isAdmin: true },
+        include: { company: true },
+      });
     }
 
     // Create session cookie (simple implementation)

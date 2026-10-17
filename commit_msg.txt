@@ -1,0 +1,1 @@
+ainos-admin login: auto-create user for admin emails instead of "User not found"
