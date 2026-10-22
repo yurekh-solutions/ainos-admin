@@ -102,7 +102,16 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-[hsl(var(--border))]">
+          {/* Dev credentials */}
+          <div className="mt-6 p-4 bg-purple-950/30 border border-purple-800/40 rounded-lg">
+            <p className="text-xs font-semibold text-purple-300 mb-2">Dev Credentials</p>
+            <div className="space-y-1 text-xs text-purple-200/80">
+              <p><span className="text-purple-400">Email:</span> yurekhsolutions@gmail.com</p>
+              <p><span className="text-purple-400">Password:</span> admin123</p>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-[hsl(var(--border))]">
             <p className="text-xs text-[hsl(var(--muted-foreground))] text-center">
               Admin access only. Authorized personnel only.
             </p>
