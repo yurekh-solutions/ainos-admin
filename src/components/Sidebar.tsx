@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Building2, FileCheck, Users,
-  HelpCircle, ChevronDown, Shield, X
+  HelpCircle, ChevronDown, Shield, X, Zap
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,6 +19,7 @@ const navItems = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/companies', label: 'Companies', icon: Building2, badge: true },
   { href: '/admin/onboarding', label: 'Approvals', icon: FileCheck },
+  { href: '/admin/tools', label: 'Tools', icon: Zap },
   { href: '/dashboard/users', label: 'Users', icon: Users },
 ];
 
