@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 async function guard(req: NextRequest) {
-  const session = await getServerSession(req);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  return null;
+  return requireAdmin(req);
 }
 
 // PATCH /api/admin/tools/[id] — update fields or toggle isActive.

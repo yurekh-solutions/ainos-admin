@@ -2,9 +2,20 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { clientIp, loginGate, releaseLogin, throttle } from '@/lib/security';
+import { createSessionToken, sessionCookieOptions, SESSION_COOKIE } from '@/lib/session';
+
+const GENERIC_FAILURE = 'Invalid email or password';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = clientIp(request);
+
+    // One shared budget per address first, so a script cannot spray the
+    // password hash without ever naming a target.
+    const throttled = throttle(request, 'login', 20, 15 * 60_000);
+    if (throttled) return throttled;
+
     const body = await request.json();
     const { email, password } = body;
 
@@ -22,13 +33,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const gate = loginGate(ip, String(email));
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many sign-in attempts. Please wait before trying again.' },
+        { status: 429, headers: { 'Retry-After': String(gate.retryAfterSeconds) } }
+      );
+    }
+
     // Check if user is admin
     const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+    // Same answer as a wrong password: this endpoint must not confirm which
+    // addresses hold an operator seat.
     if (!adminEmails.includes(email)) {
-      return NextResponse.json(
-        { error: 'Not an admin user' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: GENERIC_FAILURE }, { status: 401 });
     }
 
     // Verify password against stored hash
@@ -42,10 +60,7 @@ export async function POST(request: NextRequest) {
 
     const valid = await bcrypt.compare(password, storedHash);
     if (!valid) {
-      return NextResponse.json(
-        { error: 'Invalid password' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: GENERIC_FAILURE }, { status: 401 });
     }
 
     // If admin email not in DB yet, auto-create so login succeeds
@@ -57,7 +72,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create session cookie (simple implementation)
+    // A correct password clears both budgets, so an operator who mistyped a
+    // couple of times is never locked out of their own console.
+    releaseLogin(ip, String(email));
+
     const response = NextResponse.json({
       success: true,
       user: {
@@ -68,18 +86,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Set admin session cookie
-    response.cookies.set('admin_session', JSON.stringify({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    }), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/',
-    });
+    // Signed and expiring: an edited or replayed cookie cannot name an
+    // operator, and a stolen one stops working at the end of the day.
+    response.cookies.set(
+      SESSION_COOKIE,
+      createSessionToken({ id: user.id, email: user.email, name: user.name, role: user.role }),
+      sessionCookieOptions(60 * 60 * 8),
+    );
 
     return response;
   } catch (error) {

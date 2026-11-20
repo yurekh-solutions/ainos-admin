@@ -16,6 +16,22 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // This handler used to return a session for any email it recognised,
+        // with a note that the password check could be added later. It is the
+        // same operator gate as POST /api/login: allow-list first, then the
+        // bcrypt hash, so neither path can be walked through without one.
+        const adminEmails = (process.env.ADMIN_EMAILS || '')
+          .split(',')
+          .map(e => e.trim().toLowerCase());
+        if (!adminEmails.includes(credentials.email.toLowerCase())) {
+          return null;
+        }
+
+        const storedHash = process.env.ADMIN_PASSWORD_HASH;
+        if (!storedHash || !bcrypt.compareSync(credentials.password, storedHash)) {
+          return null;
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
           include: { company: true },
@@ -25,14 +41,6 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        // Check if user is admin
-        const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
-        if (!adminEmails.includes(user.email)) {
-          return null;
-        }
-
-        // For now, allow login without password check (can add later)
-        // In production, you should verify the password
         return {
           id: user.id,
           email: user.email,

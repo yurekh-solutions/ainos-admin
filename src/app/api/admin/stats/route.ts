@@ -1,8 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    // Platform-wide counts, company names and user emails. Without this gate
+    // the endpoint answered for any anonymous visitor.
+    const denied = await requireAdmin(req);
+    if (denied) return denied;
+
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);

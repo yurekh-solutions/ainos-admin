@@ -1,17 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { readSessionToken, SESSION_COOKIE } from '@/lib/session';
 
 export async function GET(request: NextRequest) {
-  const adminSession = request.cookies.get('admin_session');
-
-  if (!adminSession) {
-    return NextResponse.json({ user: null });
-  }
-
-  try {
-    const session = JSON.parse(adminSession.value);
-    return NextResponse.json({ user: session });
-  } catch {
-    return NextResponse.json({ user: null });
-  }
+  // Only a correctly signed, unexpired token describes a session. Anything
+  // else - including the old unsigned JSON cookie - means nobody is signed in.
+  const user = readSessionToken(request.cookies.get(SESSION_COOKIE)?.value);
+  return NextResponse.json({ user: user ? { ...user } : null });
 }

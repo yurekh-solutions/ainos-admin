@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 
 // Admin-only guard. The admin app already gates the UI behind /api/login,
-// but every mutating endpoint must re-check the session cookie itself.
+// but every mutating endpoint must re-check the session cookie itself, and
+// check it against the allow-list - a signed cookie issued before an address
+// was removed from ADMIN_EMAILS must not keep working.
 async function guard(req: NextRequest) {
-  const session = await getServerSession(req);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  return null;
+  return requireAdmin(req);
 }
 
 export function slugify(input: string): string {
