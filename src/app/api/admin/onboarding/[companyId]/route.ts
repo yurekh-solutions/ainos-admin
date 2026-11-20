@@ -176,7 +176,7 @@ export async function POST(
             <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
               <h2 style="color:#4c1d95;margin-bottom:16px;">🎉 Congratulations!</h2>
               <p style="color:#374151;line-height:1.6;">Your company <strong>${company.name}</strong> has been <strong style="color:#16a34a;">approved</strong> by the AINOS admin team.</p>
-              <p style="color:#374151;line-height:1.6;">You can now <a href="https://ainos-ywu0.onrender.com/auth/signin" style="color:#4c1d95;font-weight:600;">sign in</a> and access your full dashboard.</p>
+              <p style="color:#374151;line-height:1.6;">You can now <a href="https://ainossuite.com/auth/signin" style="color:#4c1d95;font-weight:600;">sign in</a> and access your full dashboard.</p>
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
               <p style="color:#9ca3af;font-size:13px;">— AINOS Business Suite</p>
             </div>
